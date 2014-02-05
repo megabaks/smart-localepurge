@@ -14,11 +14,6 @@ for lang in ${LINGUAS};do
 	fi
 done
 
-locale_total=0
-man_total=0
-space_tmp=0
-
-good=$'\e[32;01m'
 normal=$'\e[0m'
 bold=$'\e[1m'
 
