@@ -1,0 +1,81 @@
+#!/bin/bash
+# Based on http://git.overlays.gentoo.org/gitweb/?p=proj/localepurge.git;a=summary
+# да-да "ненужно" :3
+# Deleting all locale files on ${D} *not* listed in ${LINGUAS}
+
+live-localepurge(){
+set -e
+VERSION="0.2"
+
+for lang in ${LINGUAS};do
+	if [[ ${lang} != *_* ]];then
+		up=$(tr [a-z] [A-Z] <<< "${lang}")
+		LINGUAS+=" ${lang}_${up}"
+	fi
+done
+
+locale_total=0
+man_total=0
+space_tmp=0
+
+good=$'\e[32;01m'
+normal=$'\e[0m'
+bold=$'\e[1m'
+
+remove() {
+	local action="rm -vf"
+	local dir_action="rm -vfr"
+	local removepath="${1}"
+	${action} $(find ${removepath} -type f -o -type l)
+	[ -z "$(find ${removepath} -type f -o -type l)" ] && ${dir_action} ${removepath}
+}
+
+purgelocale(){
+	local all_dirs good_locales trash_list
+	all_dirs="$(find ${D} -type d -name 'LC_MESSAGES')"
+	if [ -n "${all_dirs}" ];then
+		for lang in ${LINGUAS};do
+			good_locales+="/${lang}/LC_MESSAGES"$'\n'
+		done
+		trash_list="$(grep -v "${good_locales%$'\n'}" <<< "${all_dirs}")"
+		for DIR in ${trash_list};do
+			remove "${DIR%/LC_MESSAGES}"
+		done
+	fi
+}
+
+purgeman(){
+	local man_dirs good_man subdirs trash_list
+	man_dirs="$(find ${D} -type d -name 'man')"
+	if [ -n "${man_dirs}" ];then
+		for DIR in ${man_dirs};do
+			subdirs="$(ls -d1 ${DIR}/* | grep -v "/man[1-9]")"
+		done
+		for lang in ${LINGUAS};do
+			good_man+="/man/${lang}"$'\n'
+		done
+		trash_list="$(grep -v "${good_man%$'\n'}" <<< "${subdirs}")"
+		for DIR in ${trash_list};do
+			remove "${DIR}"
+		done
+	fi
+}
+
+space_before="$(du -s "${D}" | cut -f1)"
+space_before="${space_before:-0}"
+
+purgelocale;
+purgeman;
+
+space_after="$(du -s "${D}" | cut -f1)"
+space_after="${space_after:-0}"
+
+total="$(($space_before - $space_after))"
+total="${total:-0}"
+
+if (( ${total} > 0 ));then
+	elog "Total disk space freed by live-localepurge: ${bold}"${total}"K${normal}"
+fi
+}
+
+post_src_install(){ time live-localepurge;}
