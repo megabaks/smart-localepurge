@@ -78,4 +78,4 @@ if (( ${total} > 0 ));then
 fi
 }
 
-post_src_install(){ time live-localepurge;}
+post_src_install(){ live-localepurge;}
