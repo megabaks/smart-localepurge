@@ -57,7 +57,7 @@ purgeman(){
 	man_dirs="$(find ${D} -type d -name 'man')"
 	if [ -n "${man_dirs}" ];then
 		for DIR in ${man_dirs};do
-			subdirs="$(ls -d1 ${DIR}/* | grep -v "/man[1-9]")"
+			subdirs="$(ls -d1 ${DIR}/* | grep -v "/man[1-9]")" || return 0
 		done
 		for lang in ${LINGUAS};do
 			good_man+="/man/${lang}"$'\n'
