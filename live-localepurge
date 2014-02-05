@@ -35,7 +35,7 @@ purgelocale(){
 		for lang in ${LINGUAS};do
 			good_locales+="/${lang}/LC_MESSAGES"$'\n'
 		done
-		trash_list="$(grep -v "${good_locales%$'\n'}" <<< "${all_dirs}")"
+		trash_list="$(grep -v "${good_locales%$'\n'}" <<< "${all_dirs}")" || return 0
 		for DIR in ${trash_list};do
 			remove "${DIR%/LC_MESSAGES}"
 		done
@@ -45,7 +45,7 @@ purgelocale(){
 		for lang in ${LINGUAS};do
 			good_qm+="${lang}.qm"$'\n'
 		done
-		trash_qm="$(grep -v "${good_qm%$'\n'}" <<< "${all_qm}")"
+		trash_qm="$(grep -v "${good_qm%$'\n'}" <<< "${all_qm}")" || return 0
 		for qm in ${trash_qm};do
 			remove "${qm}"
 		done
@@ -62,7 +62,7 @@ purgeman(){
 		for lang in ${LINGUAS};do
 			good_man+="/man/${lang}"$'\n'
 		done
-		trash_list="$(grep -v "${good_man%$'\n'}" <<< "${subdirs}")"
+		trash_list="$(grep -v "${good_man%$'\n'}" <<< "${subdirs}")" || return 0
 		for DIR in ${trash_list};do
 			remove "${DIR}"
 		done
