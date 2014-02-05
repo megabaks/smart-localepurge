@@ -11,6 +11,9 @@ for lang in ${LINGUAS};do
 	if [[ ${lang} != *_* ]];then
 		up=$(tr [a-z] [A-Z] <<< "${lang}")
 		LINGUAS+=" ${lang}_${up}"
+	else
+		p="$(cut -d '_' -f1 <<< "${lang}")"
+		LINGUAS+=" ${p}"
 	fi
 done
 
@@ -21,12 +24,12 @@ remove() {
 	local action="rm -vf"
 	local dir_action="rm -vfr"
 	local removepath="${1}"
-	${action} $(find ${removepath} -type f -o -type l)
-	[ -z "$(find ${removepath} -type f -o -type l)" ] && ${dir_action} ${removepath}
+	${action} $(find ${removepath} -type f -o -type l 2>/dev/null)
+	[ -z "$(find ${removepath} -type f -o -type l 2>/dev/null)" ] && ${dir_action} ${removepath}
 }
 
 purgelocale(){
-	local all_dirs good_locales trash_list
+	local all_dirs good_locales trash_list all_qm good_qm trash_qm
 	all_dirs="$(find ${D} -type d -name 'LC_MESSAGES')"
 	if [ -n "${all_dirs}" ];then
 		for lang in ${LINGUAS};do
@@ -35,6 +38,16 @@ purgelocale(){
 		trash_list="$(grep -v "${good_locales%$'\n'}" <<< "${all_dirs}")"
 		for DIR in ${trash_list};do
 			remove "${DIR%/LC_MESSAGES}"
+		done
+	fi
+	all_qm="$(find ${D} -type f -name "*.qm" 2>/dev/null)"
+	if [ -n "${all_qm}" ];then
+		for lang in ${LINGUAS};do
+			good_qm+="${lang}.qm"$'\n'
+		done
+		trash_qm="$(grep -v "${good_qm%$'\n'}" <<< "${all_qm}")"
+		for qm in ${trash_qm};do
+			remove "${qm}"
 		done
 	fi
 }
