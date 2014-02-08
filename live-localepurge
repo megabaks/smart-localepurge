@@ -3,6 +3,8 @@
 # да-да "ненужно" :3
 # Deleting all locale files on ${D} *not* listed in ${LINGUAS}
 
+[[ "${EBUILD_PHASE}" != "install" ]] && return 0
+
 live-localepurge(){
 set -e
 VERSION="0.2"
@@ -86,4 +88,8 @@ if (( ${total} > 0 ));then
 fi
 }
 
-post_src_install(){ live-localepurge;}
+if [[ "$(declare -F post_src_install)" ]];then
+	eval "$(declare -f post_src_install | sed "s|\(.*\)}|\1live-localepurge;}|")"
+else
+	post_src_install(){ live-localepurge;}
+fi
