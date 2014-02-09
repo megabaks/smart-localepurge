@@ -89,7 +89,7 @@ fi
 }
 
 if [[ "$(declare -F post_src_install)" ]];then
-	eval "$(declare -f post_src_install | sed "s|\(.*\)}|\1live-localepurge;}|")"
+	eval "$(declare -f post_src_install | sed "s|^}|live-localepurge;}|")"
 else
 	post_src_install(){ live-localepurge;}
 fi
