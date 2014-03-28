@@ -11,7 +11,7 @@ VERSION="0.2"
 
 for lang in ${LINGUAS};do
 	if [[ ${lang} != *_* ]];then
-		up=$(tr [a-z] [A-Z] <<< "${lang}")
+		up=$(tr '[:lower:]' '[:upper:]' <<< "${lang}")
 		LINGUAS+=" ${lang}_${up}"
 	else
 		p="$(cut -d '_' -f1 <<< "${lang}")"
